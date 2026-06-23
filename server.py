@@ -1,5 +1,10 @@
 import logging
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file before importing agent
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
