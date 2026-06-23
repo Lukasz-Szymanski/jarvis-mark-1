@@ -163,6 +163,9 @@ A test validation button is integrated into the Streamlit frontend. Clicking it 
 
 ## 📝 Development Log (Changelog)
 
+<details>
+<summary><b>View Historical Development Logs & Changelogs</b></summary>
+
 ### Entry: 2026-06-23 (Senior Python/AI & DevOps)
 Successfully set up, configured, and deployed the **J.A.R.V.I.S. Mark I** personal assistant locally and integrated with the GitHub remote repository.
 
@@ -173,3 +176,5 @@ Successfully set up, configured, and deployed the **J.A.R.V.I.S. Mark I** person
 *   **FastAPI Backend Server**: Integrated custom logging details displaying routing decisions and mock calendar/task API handlers in [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py).
 *   **Mock Services**: Exposed mock classes [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) and [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42) in [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py).
 *   **Glassmorphic Frontend**: Programmed user interface in [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) with interactive panels visualizing tasks, events, and model switching diagnostics.
+
+</details>
