@@ -92,8 +92,8 @@ class JarvisAgent:
         else:
             # Default to gemini
             self.provider = "gemini"
-            self.model_cheap = os.getenv("GEMINI_MODEL_CHEAP", "gemini-2.5-flash")
-            self.model_expensive = os.getenv("GEMINI_MODEL_EXPENSIVE", "gemini-2.5-pro")
+            self.model_cheap = os.getenv("GEMINI_MODEL_CHEAP", "gemini-3.1-flash-lite")
+            self.model_expensive = os.getenv("GEMINI_MODEL_EXPENSIVE", "gemini-3.5-flash")
             self.api_key = os.getenv("GEMINI_API_KEY")
             if not self.api_key:
                 raise ValueError("GEMINI_API_KEY is not set in environment variables.")
