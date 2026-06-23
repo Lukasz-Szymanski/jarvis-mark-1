@@ -198,31 +198,15 @@ Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
 ## 📝 Development Log (Changelog)
 
 <details>
-<summary><b>📅 June 23, 2026 — Dynamic Routing & Local Setup</b></summary>
+<summary><b>📅 June 23, 2026 — Project Initialization & Core Development</b></summary>
 
-*   **Feature:** Integrated dynamic model routing using Google Gemini SDK (`google-genai` 2.9.0) and OpenAI SDK (`openai` 2.43.0).
-*   **Feature:** Implemented Gatekeeper check model-tier decision logic in [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) (`gemini-1.5-flash` vs `gemini-1.5-pro`).
-*   **Feature:** Implemented Polish system time context anchoring dynamically injected during LLM calls.
-*   **Feature:** Created FastAPI server [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py) with structured console log reports of model tiers and CORS filters.
-*   **Feature:** Designed Glassmorphic Dark Mode UI in Streamlit [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) with test phrase loading utility.
-*   **DevOps:** Added [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) script to configure GitHub repos, push code, label issues, and initialize 4 tracker issues.
-*   **DevOps:** Added [.gitignore](file:///home/siemabrokul/Projects/jarvis_mark_1/.gitignore) file to protect `.env` secrets.
-
-</details>
-
-<details>
-<summary><b>📅 June 22, 2026 — Architectural Schemas & Mocks</b></summary>
-
-*   **Design:** Formulated Pydantic data schemas ([TaskItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L25) and [EventItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L42)) for structured JSON outputs.
-*   **Research:** Researched Gemini structured schema requirements using `GenerateContentConfig` with the new SDK.
-*   **Integration:** Designed [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) and [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42) API classes inside [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py).
-
-</details>
-
-<details>
-<summary><b>📅 June 21, 2026 — Requirements & Planning</b></summary>
-
-*   **Planning:** Drafted requirements for J.A.R.V.I.S. Mark I personal assistant.
-*   **Architecture:** Designed the Dynamic Model Routing model architecture to optimize token costs and speed.
+Today, we built and launched the first working version (Mark I) of the J.A.R.V.I.S. assistant:
+*   **Git & GitHub Setup:** Initialized local git repository, configured git identity, created a clean `.gitignore` to prevent secret leaks, and created the private GitHub repository `jarvis-mark-1`.
+*   **GitHub Issues & Labels:** Configured 4 repository labels (`setup`, `backend`, `ai`, `frontend`) and opened 4 corresponding Issues (`#1` to `#4`) via GitHub CLI (`gh`).
+*   **AI Agent Core (`agent.py`):** Coded the model routing logic. Used `gemini-1.5-flash` as the cheap Gatekeeper (returns structured classification JSON) and `gemini-1.5-pro` as the premium Executor. Configured `system_instruction` in the new `google-genai` SDK and injected active system time (`Aktualny czas systemu: YYYY-MM-DD HH:MM`).
+*   **FastAPI Backend (`server.py`):** Configured FastAPI with CORS middleware, created the `/process` handler, built a visual terminal log decorator to display routing choices, and bound mock calendar/tasks integrations.
+*   **Mocks (`integrations.py`):** Programmed visual terminal responses for `GoogleCalendarMock` and `GoogleTasksMock`.
+*   **Streamlit Frontend (`app.py`):** Built a Glassmorphic Dark Mode UI with sidebar status detectors, model-routing visual metrics panels, and a quick-load test button.
+*   **Environment Template:** Setup `.env.example` and populated `.env` locally.
 
 </details>
