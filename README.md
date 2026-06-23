@@ -29,10 +29,10 @@ graph TD
 
 ### 1. Bramkarz i Dynamiczny Dobór Modelu (Model Router)
 System chroni limity API oraz optymalizuje koszty przy użyciu dwuetapowego przetwarzania:
-*   **Bramkarz (Gatekeeper):** Zawsze jako pierwszy analizuje prompt. Używa szybkiego i taniego modelu (np. `gemini-1.5-flash` lub `gpt-4o-mini`). Zwraca ustrukturyzowany JSON z flagą logiczną `is_complex` oraz pisemnym uzasadnieniem (`reasoning`).
+*   **Bramkarz (Gatekeeper):** Zawsze jako pierwszy analizuje prompt. Używa szybkiego i taniego modelu (`gemini-1.5-flash` lub `gpt-4o-mini`). Zwraca ustrukturyzowany JSON z flagą logiczną `is_complex` oraz pisemnym uzasadnieniem (`reasoning`).
 *   **Wykonawca (Executor):**
     *   Jeśli `is_complex: False` (np. proste dodanie pojedynczego zadania) -> finalny JSON jest generowany przez ten sam tani model.
-    *   Jeśli `is_complex: True` (np. wykryte konflikty terminów, wieloetapowy plan działania, niejednoznaczności czasowe) -> agent **dynamicznie przełącza się** na model potężniejszy/droższy (np. `gemini-1.5-pro` lub `gpt-4o`), przekazując mu zadanie do zaawansowanego wnioskowania.
+    *   Jeśli `is_complex: True` (np. wykryte konflikty terminów, wieloetapowy plan działania, niejednoznaczności czasowe) -> agent **dynamicznie przełącza się** na model potężniejszy/droższy (`gemini-1.5-pro` lub `gpt-4o`), przekazując mu zadanie do zaawansowanego wnioskowania.
 
 ### 2. Świadomość Czasu (System Time Anchoring)
 Przed każdym zapytaniem do modeli LLM, do ich Promptu Systemowego wstrzykiwany jest aktualny czas systemowy w formacie `YYYY-MM-DD HH:MM`. Pozwala to modelom poprawnie interpretować relatywne określenia czasowe takie jak *"jutro"*, *"w przyszły poniedziałek"* czy *"za dwie godziny"*.
@@ -44,77 +44,121 @@ Po poprawnym sprasowaniu danych przez agenta, backend FastAPI automatycznie uruc
 
 ---
 
-## 📁 Struktura Projektu
+## 📁 Struktura Projektu i Pliki Źródłowe
 
-*   [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py) – Kod serwera FastAPI, middleware CORS, obsługa endpointu `/process` oraz logowanie konsolowe.
-*   [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) – Główna logika AI, integracja z SDK Google GenAI oraz OpenAI, obsługa Structured Outputs (Pydantic) i dynamiczne przełączanie modeli.
-*   [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py) – Klasy symulujące integrację z Google Calendar i Google Tasks.
-*   [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) – Responsywny interfejs użytkownika w Streamlit ze wsparciem dla stylów CSS, podglądu routingu i uruchamiania danych testowych.
-*   [.env.example](file:///home/siemabrokul/Projects/jarvis_mark_1/.env.example) – Przykład pliku konfiguracyjnego.
-*   [requirements.txt](file:///home/siemabrokul/Projects/jarvis_mark_1/requirements.txt) – Zależności Pythona.
-*   [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) – Skrypt automatyzujący setup Git/GitHub CLI.
+Każdy z poniższych plików tworzy kompletną aplikację:
+1.  [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py) – Serwer FastAPI z middleware CORS, endpointem `/process` obsługującym proces routingu modeli oraz wywołującym mocki w tle. Zaimplementowano tu graficzne logowanie decyzji w konsoli.
+2.  [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) – Logika agenta AI (wspierająca Pydantic Structured Outputs dla bibliotek `google-genai` oraz `openai`). Zarządza bramkarzem, przekierowaniem modeli oraz formatowaniem systemowych informacji o czasie.
+3.  [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py) – Klasy symulujące bezpośredni zapis zadań i wydarzeń do systemów Google Calendar i Google Tasks za pomocą eleganckich terminalowych konsol wizualnych.
+4.  [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) – Interfejs Streamlit stworzony w estetyce Glassmorphic Dark Mode. Pozwala on łatwo wysyłać zapytania, wizualizować ustrukturyzowane tabele i wykresy decyzji routingu modeli w czasie rzeczywistym.
+5.  [.env.example](file:///home/siemabrokul/Projects/jarvis_mark_1/.env.example) – Szablon pliku ze zmiennymi środowiskowymi.
+6.  [requirements.txt](file:///home/siemabrokul/Projects/jarvis_mark_1/requirements.txt) – Wykaz wszystkich potrzebnych bibliotek Python.
+7.  [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) – Skrypt konfiguracyjny do utworzenia prywatnego repozytorium GitHub i issue tracking.
+8.  [.gitignore](file:///home/siemabrokul/Projects/jarvis_mark_1/.gitignore) – Reguły ignorowania plików tymczasowych i sekretów w repozytorium.
 
 ---
 
-## 🛠️ Instrukcja Uruchomienia
+## 🛠️ Podręcznik Wdrożeniowy Użytkownika (Deployment & Setup)
 
-### Krok 1: Klonowanie i Konfiguracja GitHub CLI (ETAP 1)
-Jeśli posiadasz zainstalowane `gh` (GitHub CLI) i chcesz automatycznie skonfigurować prywatne repozytorium oraz Issues, nadaj uprawnienia i uruchom przygotowany skrypt:
+Wykonaj poniższe kroki, aby w pełni skonfigurować i uruchomić asystenta na swoim komputerze:
 
-```bash
-chmod +x setup_github.sh
-./setup_github.sh
-```
-
-Skrypt ten:
-1. Inicjalizuje lokalne repozytorium Git.
-2. Tworzy prywatne repozytorium `jarvis-mark-1` na Twoim koncie GitHub i wypycha do niego kod.
-3. Tworzy cztery dedykowane Issues odzwierciedlające kamienie milowe projektu (#1, #2, #3, #4).
-
-### Krok 2: Przygotowanie Środowiska
-1.  Stwórz wirtualne środowisko Pythona i zainstaluj wymagane pakiety:
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
-2.  Skopiuj szablon zmiennych środowiskowych i uzupełnij klucze API:
+### Krok 1: Skonfigurowanie kluczy API w pliku `.env`
+1.  Skopiuj szablon środowiskowy w głównym katalogu projektu:
     ```bash
     cp .env.example .env
     ```
-    *W pliku `.env` możesz ustawić `AI_PROVIDER=gemini` (zalecane, korzysta z nowego SDK `google-genai`) lub `AI_PROVIDER=openai` i wkleić odpowiednio klucze `GEMINI_API_KEY` lub `OPENAI_API_KEY`.*
+2.  Otwórz utworzony plik `.env` i wybierz dostawcę AI za pomocą parametru `AI_PROVIDER`:
+    *   **Opcja A: Google Gemini (Zalecane)**
+        *   Zostaw `AI_PROVIDER=gemini`.
+        *   Zaloguj się na platformie [Google AI Studio](https://aistudio.google.com/) i wygeneruj darmowy klucz API.
+        *   Wklej ten klucz w pliku `.env` jako wartość parametru: `GEMINI_API_KEY=twój_klucz_tutaj`.
+        *   Domyślne modele Gemini w projekcie to `gemini-1.5-flash` (tani) i `gemini-1.5-pro` (drogi).
+    *   **Opcja B: OpenAI**
+        *   Ustaw `AI_PROVIDER=openai`.
+        *   Pobierz swój klucz z profilu [OpenAI Platform](https://platform.openai.com/).
+        *   Wklej ten klucz jako wartość parametru: `OPENAI_API_KEY=twój_klucz_tutaj`.
+        *   Domyślne modele OpenAI w projekcie to `gpt-4o-mini` i `gpt-4o`.
 
-### Krok 3: Uruchomienie Backend FastAPI
-Uruchom serwer na domyślnym porcie `8000`:
+### Krok 2: Przygotowanie środowiska Python i zależności
+Uruchom w swoim terminalu w głównym katalogu projektu:
+```bash
+# 1. Tworzenie środowiska wirtualnego venv
+python3 -m venv venv
+
+# 2. Aktywacja środowiska wirtualnego
+source venv/bin/activate
+
+# 3. Aktualizacja pip oraz instalacja pakietów z requirements.txt
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Krok 3: Uruchomienie Serwera Backend (FastAPI)
+W aktywnym oknie terminala uruchom serwer uvicorn:
 ```bash
 uvicorn server:app --reload
 ```
-Serwer będzie dostępny pod adresem: `http://localhost:8000`. Dokumentację API w formacie OpenAPI znajdziesz pod `http://localhost:8000/docs`.
+*Serwer wystartuje lokalnie pod adresem: `http://localhost:8000`. Jeśli zapomniałeś ustawić klucz API w pliku `.env`, serwer zaloguje ostrzeżenie krytyczne w konsoli, ale nadal wystartuje (błędy pojawią się dopiero przy próbie przetworzenia zapytania).*
 
-### Krok 4: Uruchomienie Frontend Streamlit
-W nowej zakładce terminala (z aktywowanym wirtualnym środowiskiem) uruchom:
+### Krok 4: Uruchomienie Interfejsu Użytkownika (Streamlit)
+Otwórz drugie okno terminala, przejdź do katalogu projektu, aktywuj venv (`source venv/bin/activate`) i wpisz:
 ```bash
 streamlit run app.py
 ```
-Aplikacja frontendowa otworzy się automatycznie w przeglądarce pod adresem `http://localhost:8501`.
+*Frontend Streamlit uruchomi się automatycznie w przeglądarce pod adresem `http://localhost:8501`.*
 
 ---
 
-## 🧪 Przykładowe Dane Testowe
+## 🧪 Przebieg Scenariusza Testowego
 
-W Streamlit zintegrowano przycisk automatycznego ładowania frazy testowej:
+W interfejsie Streamlit zaimplementowano przycisk ładujący naszą frazę testową:
 > *"Jutro muszę złożyć wniosek do wydziału oświaty w sprawie mojego awansu zawodowego na nauczyciela mianowanego (robię według przepisów z 2018 roku), później muszę podejść do szkoły podpisać świadectwo i arkusz. Zrobić pranie firanek i posprzątać mieszkanie."*
 
-### Jak przebiega przetwarzanie:
-1.  **System Time Context:** Aplikacja wstrzykuje dzisiejszą datę systemową (np. `2026-06-23`).
-2.  **Gatekeeper:** Wykrywa, że zdanie zawiera szereg powiązanych akcji, relatywne określenie kolejności ("później") oraz uwarunkowanie prawne ("według przepisów z 2018 roku"). Klasyfikuje zapytanie jako **Złożone** (`is_complex: true`).
-3.  **Model Switcher:** Dynamicznie przełącza się na model droższy (np. `gemini-1.5-pro` lub `gpt-4o`).
-4.  **Parsing:**
-    *   **Wydarzenie 1:** Złożenie wniosku do wydziału oświaty w sprawie awansu (ustawione na jutrzejszy dzień, np. `2026-06-24`).
-    *   **Wydarzenie 2:** Podejście do szkoły i podpisanie świadectwa oraz arkusza (ustawione na jutro, zaplanowane po wydarzeniu 1).
-    *   **Zadanie To-Do 1:** Pranie firanek.
-    *   **Zadanie To-Do 2:** Posprzątanie mieszkania.
-5.  **Konsola FastAPI:** Wyświetla graficzne logi potwierdzające użycie modelu Pro oraz uruchomienie mocków Google Calendar i Google Tasks.
+### Ścieżka wykonania krok po kroku:
+1.  **Kotwiczenie czasu**: System automatycznie wstrzykuje dzisiejszą datę lokalną (np. `Aktualny czas systemu: 2026-06-23 18:32`).
+2.  **Klasyfikacja Bramkarza**: Bramkarz analizuje chaotyczne zdanie i wykrywa, że zawiera ono relatywność czasową ("jutro", "później") oraz uwarunkowanie prawne ("przepisy z 2018 roku"). Klasyfikuje je jako złożone (`is_complex: True`) z reasoningiem w języku angielskim/polskim.
+3.  **Podmiana modelów**: Kod dynamicznie przełącza się na model droższy i potężniejszy (`gemini-1.5-pro` lub `gpt-4o`).
+4.  **Generowanie ustrukturyzowanych danych**: Model droższy rozbija tekst wejściowy na:
+    *   **Wydarzenie 1**: Złożenie wniosku do wydziału oświaty (zaplanowane na jutro, np. `2026-06-24`).
+    *   **Wydarzenie 2**: Podejście do szkoły i podpisanie świadectwa oraz arkusza (zaplanowane na jutro po wydarzeniu 1).
+    *   **Zadanie To-Do 1**: Pranie firanek.
+    *   **Zadanie To-Do 2**: Posprzątanie mieszkania.
+5.  **Wypisanie Mocków w konsoli**: Backend FastAPI automatycznie wywołuje mockowane integracje i drukuje w terminalu sformatowane ramki.
+
+Oto przykładowy log z konsoli serwera po przetworzeniu powyższej frazy:
+```text
+🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
+🤖 [J.A.R.V.I.S. DYNAMIC ROUTING DECISION]
+  Gatekeeper Decision:  COMPLEX (Needs Advanced AI)
+  Reasoning:            Prompt contains multiple sequential tasks (tomorrow, then school), context about 2018 education rules, and domestic chores.
+  Provider Used:        GEMINI
+  Model Selected:       gemini-1.5-pro (EXPENSIVE tier)
+🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
+
+🔌 Triggering Mock Integrations for identified entities...
+
+📅 [GOOGLE CALENDAR] INTEGRATION - CREATING EVENT
+  Title:       Złożenie wniosku do wydziału oświaty w sprawie awansu zawodowego
+  Start Time:  2026-06-24 09:00
+  Description: Składanie wniosku o awans zawodowy nauczyciela mianowanego według przepisów z 2018 r.
+==================================================
+
+📅 [GOOGLE CALENDAR] INTEGRATION - CREATING EVENT
+  Title:       Podpisanie świadectwa i arkusza w szkole
+  Start Time:  2026-06-24 12:00
+  Description: Podejście do szkoły i podpisanie dokumentów.
+==================================================
+
+📋 [GOOGLE TASKS] INTEGRATION - CREATING TASK
+  Title:       Pranie firanek
+  Priority:    MEDIUM
+==================================================
+
+📋 [GOOGLE TASKS] INTEGRATION - CREATING TASK
+  Title:       Posprzątanie mieszkania
+  Priority:    MEDIUM
+==================================================
+```
 
 ---
 
@@ -132,63 +176,3 @@ Zrealizowano pełny cykl konfiguracji i wdrożenia osobistego asystenta **J.A.R.
 *   **Backend API**: Serwer [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py) w FastAPI udostępnia endpoint `/process` z wbudowanym mechanizmem logowania decyzji routingu w konsoli oraz automatycznym wywoływaniem mocków integracji z zewnętrznymi serwisami Google.
 *   **Mock Integracji**: W pliku [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py) zdefiniowano klasy [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) i [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42).
 *   **Streamlit Frontend**: Zaprojektowano interfejs w pliku [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) z wykorzystaniem estetyki Glassmorphic Dark Mode, podglądem routingu w czasie rzeczywistym oraz zintegrowanym przyciskiem ładowania danych testowych.
-
-#### 2. Wynik wykonania scenariusza testowego:
-*   **Dane testowe**: *"Jutro muszę złożyć wniosek do wydziału oświaty w sprawie mojego awansu zawodowego na nauczyciela mianowanego (robię według przepisów z 2018 roku), później muszę podejść do szkoły podpisać świadectwo i arkusz. Zrobić pranie firanek i posprzątać mieszkanie."*
-*   **Wynik weryfikacji**:
-    *   **Bramkarz** poprawnie zaklasyfikował zadanie jako złożone (`is_complex: True`) ze względu na uwarunkowanie prawne i sekwencję zadań w czasie.
-    *   System pomyślnie przekierował zapytanie do modelu **Pro** (`gemini-1.5-pro`).
-    *   AI prawidłowo wygenerowało 2 wydarzenia kalendarzowe (z datą `2026-06-24`) i 2 zadania To-Do, które zostały automatycznie przekazane do mocków integracji.
-
-#### 3. Podręcznik Wdrożeniowy Użytkownika (User Setup & Deployment Guide)
-Aby uruchomić aplikację w pełni funkcjonalnie z modelami LLM, wykonaj poniższe kroki krok po kroku:
-
-##### Krok A: Skonfigurowanie kluczy API w pliku `.env`
-1.  Skopiuj szablon środowiskowy w głównym katalogu projektu:
-    ```bash
-    cp .env.example .env
-    ```
-2.  Otwórz plik `.env` i wybierz dostawcę AI poprzez parametr `AI_PROVIDER`:
-    *   Jeśli wybierasz **Google Gemini** (zalecany):
-        *   Zostaw `AI_PROVIDER=gemini`.
-        *   Wejdź na stronę [Google AI Studio](https://aistudio.google.com/) i wygeneruj darmowy/płatny klucz API.
-        *   Wklej wygenerowany klucz w linii: `GEMINI_API_KEY=twój_klucz_tutaj`.
-        *   Domyślne modele są ustawione na `gemini-1.5-flash` (tani/szybki) oraz `gemini-1.5-pro` (drogi/zaawansowany).
-    *   Jeśli wybierasz **OpenAI**:
-        *   Ustaw `AI_PROVIDER=openai`.
-        *   Zaloguj się na [OpenAI Platform](https://platform.openai.com/) i stwórz nowy klucz API w sekcji API Keys.
-        *   Wklej wygenerowany klucz w linii: `OPENAI_API_KEY=twój_klucz_tutaj`.
-        *   Domyślne modele to `gpt-4o-mini` oraz `gpt-4o`.
-
-##### Krok B: Przygotowanie środowiska Python
-Upewnij się, że masz zainstalowany Python 3.9+. W terminalu w katalogu głównym projektu uruchom:
-```bash
-# 1. Tworzenie wirtualnego środowiska
-python3 -m venv venv
-
-# 2. Aktywacja wirtualnego środowiska (dla systemów Linux/MacOS)
-source venv/bin/activate
-
-# 3. Instalacja wszystkich zależności (fastapi, streamlit, google-genai, openai itp.)
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-##### Krok C: Uruchomienie Serwera Backend (FastAPI)
-Z poziomu aktywowanego środowiska wirtualnego uruchom serwer uvicorn:
-```bash
-uvicorn server:app --reload
-```
-*Serwer zacznie nasłuchiwać na porcie `8000`. W logach startowych zobaczysz status załadowania agenta. Jeśli klucze nie zostaną skonfigurowane, serwer zgłosi na starcie błąd krytyczny `GEMINI_API_KEY is not set`, ale uruchomi się i będzie czekał na poprawne uzupełnienie pliku `.env`.*
-
-##### Krok D: Uruchomienie Interfejsu (Streamlit Frontend)
-W nowym oknie terminala (pamiętaj o aktywacji środowiska za pomocą `source venv/bin/activate`) uruchom interfejs Streamlit:
-```bash
-streamlit run app.py
-```
-*Frontend otworzy się automatycznie w Twojej przeglądarce pod adresem `http://localhost:8501`.*
-
-##### Krok E: Przetestowanie działania z danymi testowymi
-1. W interfejsie Streamlit kliknij na fioletowy boks **"Załaduj dane testowe"**. Spowoduje to automatyczne załadowanie przygotowanej, chaotycznej frazy do pola tekstowego.
-2. Kliknij **"Przetwórz i Zaplanuj"**.
-3. Obserwuj wynik w interfejsie oraz logi w konsoli uvicorna. Bramkarz poprawnie zinterpretuje dane, wstrzyknie aktualny czas systemu, przełączy model na wersję `Pro` (np. `gemini-1.5-pro`) i zwróci ustrukturyzowaną rozpiskę kalendarza oraz zadań, wywołując w tle mockowane integracje.
