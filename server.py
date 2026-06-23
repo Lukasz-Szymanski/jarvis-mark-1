@@ -2,8 +2,8 @@ import logging
 import sys
 from dotenv import load_dotenv
 
-# Load environment variables from .env file before importing agent
-load_dotenv()
+# Load environment variables from .env file before importing agent, forcing override
+load_dotenv(override=True)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
