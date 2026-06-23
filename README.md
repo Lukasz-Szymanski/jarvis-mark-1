@@ -221,6 +221,7 @@ Today, we built, launched, and successfully validated the first working version 
 *   **Bugfix (FastAPI dotenv load):** Added `load_dotenv(override=True)` to `server.py` to ensure local `.env` modifications forcefully overwrite active shell/process environment states.
 *   **Bugfix (Streamlit connection display):** Resolved an `AttributeError` when starting the Streamlit application without API keys configured (the app tried to perform `.upper()` on a `None` provider value, throwing an exception).
 *   **Model Configuration Optimization:** Swapped default Gemini models to `gemini-3.1-flash-lite` (cheap Gatekeeper) and `gemini-3.5-flash` (premium Executor) to bypass temporary server overloads (503) and free-tier quota limits (429) on other models.
+*   **Antigravity CLI Integration (`AI_PROVIDER=antigravity`):** Implemented support for the CLI-based provider 'antigravity' using subprocess execution of the `agy` command with JSON schema instructions and output cleaning. This completely bypasses the external API keys, rate limits, and 503 overloads by utilizing the local authorized session of `antigravity-cli`.
 *   **E2E Validation:** Successfully verified the test query pipeline. The Gatekeeper correctly classified the prompt as complex (`is_complex: True`), routed to `gemini-3.5-flash`, parsed dates relative to system time, and executed the 4 mock Google Tasks integration requests.
 
 </details>

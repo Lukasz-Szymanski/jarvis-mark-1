@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import subprocess
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
@@ -76,21 +77,26 @@ class JarvisAgent:
     """
     Core AI logic for J.A.R.V.I.S. Mark I.
     Handles gatekeeper check and dynamic model switching for advanced queries.
+    Supports API-based (OpenAI, Gemini) and CLI-based (Antigravity CLI) providers.
     """
 
     def __init__(self):
         # Configure providers from environment variables
-        self.provider = os.getenv("AI_PROVIDER", "gemini").lower()
+        self.provider = os.getenv("AI_PROVIDER", "antigravity").lower()
         
-        # Model definitions (can be overriden via env)
+        # Model definitions (can be overridden via env)
         if self.provider == "openai":
             self.model_cheap = os.getenv("OPENAI_MODEL_CHEAP", "gpt-4o-mini")
             self.model_expensive = os.getenv("OPENAI_MODEL_EXPENSIVE", "gpt-4o")
             self.api_key = os.getenv("OPENAI_API_KEY")
             if not self.api_key:
                 raise ValueError("OPENAI_API_KEY is not set in environment variables.")
+        elif self.provider == "antigravity":
+            self.model_cheap = os.getenv("ANTIGRAVITY_MODEL_CHEAP", "Gemini 3.5 Flash (Low)")
+            self.model_expensive = os.getenv("ANTIGRAVITY_MODEL_EXPENSIVE", "Gemini 3.5 Flash (High)")
+            self.api_key = None
         else:
-            # Default to gemini
+            # Default to gemini (API)
             self.provider = "gemini"
             self.model_cheap = os.getenv("GEMINI_MODEL_CHEAP", "gemini-3.1-flash-lite")
             self.model_expensive = os.getenv("GEMINI_MODEL_EXPENSIVE", "gemini-3.5-flash")
@@ -104,6 +110,18 @@ class JarvisAgent:
     def _get_current_time_string(self) -> str:
         """Returns current system time in format YYYY-MM-DD HH:MM."""
         return datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    def _clean_and_parse_json(self, raw_text: str) -> dict:
+        """Cleans up markdown code fences and parses raw JSON string."""
+        cleaned = raw_text.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[len("```json"):]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+        return json.loads(cleaned)
 
     def _call_openai_gatekeeper(self, user_prompt: str, current_time: str) -> GatekeeperResult:
         """Helper to invoke OpenAI for Gatekeeper logic."""
@@ -157,6 +175,45 @@ class JarvisAgent:
         
         data = json.loads(response.text)
         return GatekeeperResult(**data)
+
+    def _call_antigravity_gatekeeper(self, user_prompt: str, current_time: str) -> GatekeeperResult:
+        """Helper to invoke Antigravity CLI for Gatekeeper logic."""
+        system_prompt = (
+            "You are the Gatekeeper of J.A.R.V.I.S. Mark I. Your task is to analyze user requests "
+            "and determine if they require complex reasoning, resolving scheduling conflicts, or multi-step execution "
+            "planning (is_complex = True), or if they are simple single-step additions/requests (is_complex = False).\n"
+            f"Aktualny czas systemu: {current_time}.\n"
+            "Your response must be valid JSON matching this schema:\n"
+            "{\n"
+            "  \"is_complex\": boolean,\n"
+            "  \"reasoning\": string\n"
+            "}\n"
+            "Do not include any other text or markdown code fences, just the JSON string."
+        )
+        
+        combined_prompt = f"System instructions:\n{system_prompt}\n\nUser request:\n{user_prompt}"
+        cmd = ["agy"]
+        if self.model_cheap:
+            cmd.extend(["--model", self.model_cheap])
+            
+        logger.info(f"Sending request to Antigravity Gatekeeper using CLI command '{' '.join(cmd)}'...")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, stderr = process.communicate(input=combined_prompt)
+        
+        if process.returncode != 0:
+            error_msg = stderr.strip() if stderr else "Unknown error"
+            raise RuntimeError(f"Antigravity CLI failed: {error_msg}")
+            
+        parsed = self._clean_and_parse_json(stdout)
+        return GatekeeperResult(**parsed)
 
     def _call_openai_executor(self, user_prompt: str, current_time: str, model_to_use: str) -> ProcessedResult:
         """Helper to invoke OpenAI to parse tasks and events."""
@@ -219,6 +276,47 @@ class JarvisAgent:
         data = json.loads(response.text)
         return ProcessedResult(**data)
 
+    def _call_antigravity_executor(self, user_prompt: str, current_time: str, model_to_use: str) -> ProcessedResult:
+        """Helper to invoke Antigravity CLI to parse tasks and events."""
+        schema_json = json.dumps(ProcessedResult.model_json_schema())
+        system_prompt = (
+            "You are J.A.R.V.I.S. Mark I, an advanced AI personal assistant.\n"
+            "Your task is to parse messy user commands into structured calendar events and To-Do tasks.\n"
+            f"Aktualny czas systemu: {current_time}.\n"
+            "Interpret relative dates/times (like 'tomorrow', 'next Monday', 'in 2 hours') relative to this system time.\n"
+            "Ensure that:\n"
+            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority ('high', 'medium', 'low'), and description.\n"
+            "2. Events have a title, start_time (YYYY-MM-DD HH:MM), optional end_time, location, and description.\n"
+            "3. Provide a friendly and concise Polish summary describing the schedule and tasks you've generated.\n"
+            "Your response must be valid JSON conforming to this JSON schema:\n"
+            f"{schema_json}\n"
+            "Do not include any other text or markdown code fences, just the JSON string."
+        )
+        
+        combined_prompt = f"System instructions:\n{system_prompt}\n\nUser request:\n{user_prompt}"
+        cmd = ["agy"]
+        if model_to_use:
+            cmd.extend(["--model", model_to_use])
+            
+        logger.info(f"Sending request to Antigravity Executor using CLI command '{' '.join(cmd)}'...")
+        
+        process = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding='utf-8'
+        )
+        stdout, stderr = process.communicate(input=combined_prompt)
+        
+        if process.returncode != 0:
+            error_msg = stderr.strip() if stderr else "Unknown error"
+            raise RuntimeError(f"Antigravity CLI failed: {error_msg}")
+            
+        parsed = self._clean_and_parse_json(stdout)
+        return ProcessedResult(**parsed)
+
     def process_command(self, user_prompt: str) -> dict:
         """
         Executes the main pipeline:
@@ -233,6 +331,8 @@ class JarvisAgent:
             # 1. Gatekeeper step
             if self.provider == "openai":
                 gatekeeper = self._call_openai_gatekeeper(user_prompt, current_time)
+            elif self.provider == "antigravity":
+                gatekeeper = self._call_antigravity_gatekeeper(user_prompt, current_time)
             else:
                 gatekeeper = self._call_gemini_gatekeeper(user_prompt, current_time)
                 
@@ -254,6 +354,8 @@ class JarvisAgent:
             # 3. Execution step
             if self.provider == "openai":
                 result = self._call_openai_executor(user_prompt, current_time, chosen_model)
+            elif self.provider == "antigravity":
+                result = self._call_antigravity_executor(user_prompt, current_time, chosen_model)
             else:
                 result = self._call_gemini_executor(user_prompt, current_time, chosen_model)
                 
