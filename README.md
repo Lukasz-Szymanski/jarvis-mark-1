@@ -208,15 +208,19 @@ Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
 ## 📝 Development Log (Changelog)
 
 <details>
-<summary><b>📅 June 23, 2026 — Project Initialization & Core Development</b></summary>
+<summary><b>📅 June 23, 2026 — Project Initialization, Core Development & E2E Validation</b></summary>
 
-Today, we built and launched the first working version (Mark I) of the J.A.R.V.I.S. assistant:
+Today, we built, launched, and successfully validated the first working version (Mark I) of the J.A.R.V.I.S. assistant:
 *   **Git & GitHub Setup:** Initialized local git repository, configured git identity, created a clean `.gitignore` to prevent secret leaks, and created the private GitHub repository `jarvis-mark-1`.
 *   **GitHub Issues & Labels:** Configured 4 repository labels (`setup`, `backend`, `ai`, `frontend`) and opened 4 corresponding Issues (`#1` to `#4`) via GitHub CLI (`gh`).
-*   **AI Agent Core (`agent.py`):** Coded the model routing logic. Used `gemini-2.5-flash` as the cheap Gatekeeper (returns structured classification JSON) and `gemini-2.5-pro` as the premium Executor. Configured `system_instruction` in the new `google-genai` SDK and injected active system time (`Aktualny czas systemu: YYYY-MM-DD HH:MM`).
+*   **AI Agent Core (`agent.py`):** Coded the model routing logic. Configured `system_instruction` in the new `google-genai` SDK and injected active system time (`Aktualny czas systemu: YYYY-MM-DD HH:MM`).
 *   **FastAPI Backend (`server.py`):** Configured FastAPI with CORS middleware, created the `/process` handler, built a visual terminal log decorator to display routing choices, and bound mock calendar/tasks integrations.
 *   **Mocks (`integrations.py`):** Programmed visual terminal responses for `GoogleCalendarMock` and `GoogleTasksMock`.
 *   **Streamlit Frontend (`app.py`):** Built a Glassmorphic Dark Mode UI with sidebar status detectors, model-routing visual metrics panels, and a quick-load test button.
 *   **Environment Template:** Setup `.env.example` and populated `.env` locally.
+*   **Bugfix (FastAPI dotenv load):** Added `load_dotenv(override=True)` to `server.py` to ensure local `.env` modifications forcefully overwrite active shell/process environment states.
+*   **Bugfix (Streamlit connection display):** Resolved an `AttributeError` when starting the Streamlit application without API keys configured (the app tried to perform `.upper()` on a `None` provider value, throwing an exception).
+*   **Model Configuration Optimization:** Swapped default Gemini models to `gemini-2.5-flash-lite` to bypass temporary server overloads (503) on `gemini-2.5-flash` and free-tier quota limits (429) on `gemini-2.5-pro`.
+*   **E2E Validation:** Successfully verified the test query pipeline. The Gatekeeper correctly classified the prompt as complex (`is_complex: True`), routed to `gemini-2.5-flash-lite`, parsed dates relative to system time, and executed the 4 mock Google Tasks integration requests.
 
 </details>
