@@ -25,6 +25,12 @@ echo "🔑 Creating private GitHub repository 'jarvis-mark-1'..."
 gh repo create jarvis-mark-1 --private --source=. --remote=origin --push
 
 # 3. Create the 4 structural issues
+echo "🏷️ Creating labels on GitHub..."
+gh label create setup --color "E9967A" --description "Initial setup and project structure" || echo "Label 'setup' already exists."
+gh label create backend --color "8FBC8F" --description "FastAPI backend services" || echo "Label 'backend' already exists."
+gh label create ai --color "4682B4" --description "AI modeling and routing" || echo "Label 'ai' already exists."
+gh label create frontend --color "DDA0DD" --description "Streamlit frontend interface" || echo "Label 'frontend' already exists."
+
 echo "📋 Creating issues on GitHub..."
 
 gh issue create \
