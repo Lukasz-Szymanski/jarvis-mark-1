@@ -16,16 +16,26 @@ The following diagram illustrates the application data flow:
 
 ```mermaid
 graph TD
-    A["User - Streamlit Frontend"] -->|Messy Prompt| B["FastAPI Backend - /process"]
-    B -->|Initialization and Handoff| C["JarvisAgent"]
-    C -->|Step 1: Gatekeeper (Cheap Model)| D{"Is the request complex?"}
-    D -->|NO - is_complex: False| E["Use Cheap Model for final JSON extraction"]
-    D -->|YES - is_complex: True| F["Dynamically upgrade model to Pro/Expensive tier"]
-    F -->|Step 2: Executor (Expensive Model)| G["Perform deep analysis and JSON extraction"]
-    E --> H["Structured JSON Pydantic"]
+    A["User - Streamlit Frontend"]
+    B["FastAPI Backend - /process"]
+    C["JarvisAgent"]
+    D{"Is the request complex?"}
+    E["Use Cheap Model for final JSON extraction"]
+    F["Dynamically upgrade model to Pro/Expensive tier"]
+    G["Perform deep analysis and JSON extraction"]
+    H["Structured JSON Pydantic"]
+    I["Google Calendar Mock / Google Tasks Mock"]
+
+    A -->|Messy Prompt| B
+    B -->|Initialization and Handoff| C
+    C -->|Step 1: Gatekeeper - Cheap Model| D
+    D -->|NO - is_complex: False| E
+    D -->|YES - is_complex: True| F
+    F -->|Step 2: Executor - Expensive Model| G
+    E --> H
     G --> H
     H -->|Extracted Data| B
-    B -->|Step 3: Trigger Mock Integrations| I["Google Calendar Mock / Google Tasks Mock"]
+    B -->|Step 3: Trigger Mock Integrations| I
     B -->|Final JSON Response| A
 ```
 
