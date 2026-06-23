@@ -198,9 +198,8 @@ Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
 ## 📝 Development Log (Changelog)
 
 <details>
-<summary><b>View Historical Logs by Date (Click to Expand)</b></summary>
+<summary><b>📅 June 23, 2026 — Dynamic Routing & Local Setup</b></summary>
 
-### 📅 June 23, 2026
 *   **Feature:** Integrated dynamic model routing using Google Gemini SDK (`google-genai` 2.9.0) and OpenAI SDK (`openai` 2.43.0).
 *   **Feature:** Implemented Gatekeeper check model-tier decision logic in [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) (`gemini-1.5-flash` vs `gemini-1.5-pro`).
 *   **Feature:** Implemented Polish system time context anchoring dynamically injected during LLM calls.
@@ -209,12 +208,20 @@ Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
 *   **DevOps:** Added [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) script to configure GitHub repos, push code, label issues, and initialize 4 tracker issues.
 *   **DevOps:** Added [.gitignore](file:///home/siemabrokul/Projects/jarvis_mark_1/.gitignore) file to protect `.env` secrets.
 
-### 📅 June 22, 2026
+</details>
+
+<details>
+<summary><b>📅 June 22, 2026 — Architectural Schemas & Mocks</b></summary>
+
 *   **Design:** Formulated Pydantic data schemas ([TaskItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L25) and [EventItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L42)) for structured JSON outputs.
 *   **Research:** Researched Gemini structured schema requirements using `GenerateContentConfig` with the new SDK.
 *   **Integration:** Designed [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) and [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42) API classes inside [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py).
 
-### 📅 June 21, 2026
+</details>
+
+<details>
+<summary><b>📅 June 21, 2026 — Requirements & Planning</b></summary>
+
 *   **Planning:** Drafted requirements for J.A.R.V.I.S. Mark I personal assistant.
 *   **Architecture:** Designed the Dynamic Model Routing model architecture to optimize token costs and speed.
 
