@@ -189,7 +189,9 @@ with st.sidebar:
         if health_resp.status_code == 200:
             status_data = health_resp.json()
             st.success("🟢 Połączono z Backendem")
-            st.info(f"AI Provider: **{status_data.get('provider', 'gemini').upper()}**")
+            provider = status_data.get("provider")
+            provider_str = provider.upper() if provider else "UNCONFIGURED (Check .env)"
+            st.info(f"AI Provider: **{provider_str}**")
         else:
             st.warning("⚠️ Backend zgłasza nieprawidłowy status")
     except Exception:
