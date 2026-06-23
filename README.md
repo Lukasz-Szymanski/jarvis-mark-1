@@ -139,3 +139,56 @@ Zrealizowano pełny cykl konfiguracji i wdrożenia osobistego asystenta **J.A.R.
     *   **Bramkarz** poprawnie zaklasyfikował zadanie jako złożone (`is_complex: True`) ze względu na uwarunkowanie prawne i sekwencję zadań w czasie.
     *   System pomyślnie przekierował zapytanie do modelu **Pro** (`gemini-1.5-pro`).
     *   AI prawidłowo wygenerowało 2 wydarzenia kalendarzowe (z datą `2026-06-24`) i 2 zadania To-Do, które zostały automatycznie przekazane do mocków integracji.
+
+#### 3. Podręcznik Wdrożeniowy Użytkownika (User Setup & Deployment Guide)
+Aby uruchomić aplikację w pełni funkcjonalnie z modelami LLM, wykonaj poniższe kroki krok po kroku:
+
+##### Krok A: Skonfigurowanie kluczy API w pliku `.env`
+1.  Skopiuj szablon środowiskowy w głównym katalogu projektu:
+    ```bash
+    cp .env.example .env
+    ```
+2.  Otwórz plik `.env` i wybierz dostawcę AI poprzez parametr `AI_PROVIDER`:
+    *   Jeśli wybierasz **Google Gemini** (zalecany):
+        *   Zostaw `AI_PROVIDER=gemini`.
+        *   Wejdź na stronę [Google AI Studio](https://aistudio.google.com/) i wygeneruj darmowy/płatny klucz API.
+        *   Wklej wygenerowany klucz w linii: `GEMINI_API_KEY=twój_klucz_tutaj`.
+        *   Domyślne modele są ustawione na `gemini-1.5-flash` (tani/szybki) oraz `gemini-1.5-pro` (drogi/zaawansowany).
+    *   Jeśli wybierasz **OpenAI**:
+        *   Ustaw `AI_PROVIDER=openai`.
+        *   Zaloguj się na [OpenAI Platform](https://platform.openai.com/) i stwórz nowy klucz API w sekcji API Keys.
+        *   Wklej wygenerowany klucz w linii: `OPENAI_API_KEY=twój_klucz_tutaj`.
+        *   Domyślne modele to `gpt-4o-mini` oraz `gpt-4o`.
+
+##### Krok B: Przygotowanie środowiska Python
+Upewnij się, że masz zainstalowany Python 3.9+. W terminalu w katalogu głównym projektu uruchom:
+```bash
+# 1. Tworzenie wirtualnego środowiska
+python3 -m venv venv
+
+# 2. Aktywacja wirtualnego środowiska (dla systemów Linux/MacOS)
+source venv/bin/activate
+
+# 3. Instalacja wszystkich zależności (fastapi, streamlit, google-genai, openai itp.)
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+##### Krok C: Uruchomienie Serwera Backend (FastAPI)
+Z poziomu aktywowanego środowiska wirtualnego uruchom serwer uvicorn:
+```bash
+uvicorn server:app --reload
+```
+*Serwer zacznie nasłuchiwać na porcie `8000`. W logach startowych zobaczysz status załadowania agenta. Jeśli klucze nie zostaną skonfigurowane, serwer zgłosi na starcie błąd krytyczny `GEMINI_API_KEY is not set`, ale uruchomi się i będzie czekał na poprawne uzupełnienie pliku `.env`.*
+
+##### Krok D: Uruchomienie Interfejsu (Streamlit Frontend)
+W nowym oknie terminala (pamiętaj o aktywacji środowiska za pomocą `source venv/bin/activate`) uruchom interfejs Streamlit:
+```bash
+streamlit run app.py
+```
+*Frontend otworzy się automatycznie w Twojej przeglądarce pod adresem `http://localhost:8501`.*
+
+##### Krok E: Przetestowanie działania z danymi testowymi
+1. W interfejsie Streamlit kliknij na fioletowy boks **"Załaduj dane testowe"**. Spowoduje to automatyczne załadowanie przygotowanej, chaotycznej frazy do pola tekstowego.
+2. Kliknij **"Przetwórz i Zaplanuj"**.
+3. Obserwuj wynik w interfejsie oraz logi w konsoli uvicorna. Bramkarz poprawnie zinterpretuje dane, wstrzyknie aktualny czas systemu, przełączy model na wersję `Pro` (np. `gemini-1.5-pro`) i zwróci ustrukturyzowaną rozpiskę kalendarza oraz zadań, wywołując w tle mockowane integracje.
