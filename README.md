@@ -1,5 +1,11 @@
 # J.A.R.V.I.S. Mark I 🤖
 
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.31%2B-FF4B4B.svg?style=flat&logo=streamlit)](https://streamlit.io/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
 A personal AI assistant that analyzes messy, unstructured user prompts and organizes them into structured To-Do tasks and calendar events. The project implements an advanced **Dynamic Model Routing** pattern to optimize API limits and costs, alongside **Time Anchoring** (system-level time injection) to accurately resolve relative dates (e.g., "tomorrow", "next week", "in 2 hours").
 
 ---
@@ -161,20 +167,55 @@ A test validation button is integrated into the Streamlit frontend. Clicking it 
 
 ---
 
+## 🛠️ Troubleshooting
+
+If you encounter issues during setup or runtime, check these common scenarios:
+
+### 1. Connection Error (`🔴 Brak połączenia z Backendem FastAPI`)
+*   **Cause:** The Streamlit frontend cannot access the FastAPI port `8000`.
+*   **Solution:** Make sure your backend server is actively running. Check if `uvicorn server:app --reload` has crashed or is listening on a different port. Verify that the `API_URL` variable in your `.env` matches the port (default: `http://localhost:8000`).
+
+### 2. Missing API Keys Error
+*   **Cause:** A startup warning or `HTTP 500` response stating that keys are missing.
+*   **Solution:** Copy `.env.example` to `.env` and fill in `GEMINI_API_KEY` (if using Gemini) or `OPENAI_API_KEY` (if using OpenAI). Ensure you have restarted the server after saving changes to the `.env` file.
+
+### 3. CORS Policy Errors
+*   **Cause:** The browser blocks the request from Streamlit (`localhost:8501`) to FastAPI (`localhost:8000`).
+*   **Solution:** FastAPI is configured with CORS middleware allowing `allow_origins=["*"]`. Ensure you haven't locked down the FastAPI origin headers in [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py).
+
+---
+
+## 🚀 Future Roadmap
+
+Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
+*   [ ] **OAuth2 Integration:** Transition from mock structures to official Google Calendar and Google Tasks OAuth2 authorization flow.
+*   [ ] **Persistent Database:** Integrate SQLite/PostgreSQL to persist tasks and user parameters beyond server restarts.
+*   [ ] **Voice Input Interface:** Add audio transcription (Speech-to-Text) using Whisper API directly inside the Streamlit frontend.
+*   [ ] **Multi-user Support:** Allow multiple users to log in independently with their own calendar keys.
+
+---
+
 ## 📝 Development Log (Changelog)
 
 <details>
-<summary><b>View Historical Development Logs & Changelogs</b></summary>
+<summary><b>View Historical Logs by Date (Click to Expand)</b></summary>
 
-### Entry: 2026-06-23 (Senior Python/AI & DevOps)
-Successfully set up, configured, and deployed the **J.A.R.V.I.S. Mark I** personal assistant locally and integrated with the GitHub remote repository.
+### 📅 June 23, 2026
+*   **Feature:** Integrated dynamic model routing using Google Gemini SDK (`google-genai` 2.9.0) and OpenAI SDK (`openai` 2.43.0).
+*   **Feature:** Implemented Gatekeeper check model-tier decision logic in [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) (`gemini-1.5-flash` vs `gemini-1.5-pro`).
+*   **Feature:** Implemented Polish system time context anchoring dynamically injected during LLM calls.
+*   **Feature:** Created FastAPI server [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py) with structured console log reports of model tiers and CORS filters.
+*   **Feature:** Designed Glassmorphic Dark Mode UI in Streamlit [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) with test phrase loading utility.
+*   **DevOps:** Added [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) script to configure GitHub repos, push code, label issues, and initialize 4 tracker issues.
+*   **DevOps:** Added [.gitignore](file:///home/siemabrokul/Projects/jarvis_mark_1/.gitignore) file to protect `.env` secrets.
 
-#### 1. Implemented features & modifications:
-*   **GitHub CLI Setup Script**: Developed [setup_github.sh](file:///home/siemabrokul/Projects/jarvis_mark_1/setup_github.sh) to initialize local git configurations, create repository tags (`setup`, `backend`, `ai`, `frontend`), and publish 4 structural Issues (#1-#4).
-*   **Dynamic Model Routing Architecture**: Added multi-model routing in [agent.py](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py) with structured outputs mapping cheap model (`gemini-1.5-flash`) and premium model (`gemini-1.5-pro`) checks.
-*   **Time Anchoring Context**: Injected system local datetime into the AI system prompts, empowering date mapping of terms like "tomorrow".
-*   **FastAPI Backend Server**: Integrated custom logging details displaying routing decisions and mock calendar/task API handlers in [server.py](file:///home/siemabrokul/Projects/jarvis_mark_1/server.py).
-*   **Mock Services**: Exposed mock classes [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) and [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42) in [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py).
-*   **Glassmorphic Frontend**: Programmed user interface in [app.py](file:///home/siemabrokul/Projects/jarvis_mark_1/app.py) with interactive panels visualizing tasks, events, and model switching diagnostics.
+### 📅 June 22, 2026
+*   **Design:** Formulated Pydantic data schemas ([TaskItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L25) and [EventItem](file:///home/siemabrokul/Projects/jarvis_mark_1/agent.py#L42)) for structured JSON outputs.
+*   **Research:** Researched Gemini structured schema requirements using `GenerateContentConfig` with the new SDK.
+*   **Integration:** Designed [GoogleCalendarMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L6) and [GoogleTasksMock](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py#L42) API classes inside [integrations.py](file:///home/siemabrokul/Projects/jarvis_mark_1/integrations.py).
+
+### 📅 June 21, 2026
+*   **Planning:** Drafted requirements for J.A.R.V.I.S. Mark I personal assistant.
+*   **Architecture:** Designed the Dynamic Model Routing model architecture to optimize token costs and speed.
 
 </details>
