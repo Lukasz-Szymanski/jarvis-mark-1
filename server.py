@@ -11,6 +11,10 @@ from pydantic import BaseModel
 
 from agent import JarvisAgent
 from integrations import GoogleCalendarMock, GoogleTasksMock
+from database import init_db, add_task, add_idea
+
+# Initialize local database
+init_db()
 
 # =====================================================================
 # SYSTEM LOGGING CONFIGURATION
@@ -123,14 +127,31 @@ def process_command(payload: ProcessRequest):
                 title=task["title"],
                 due=task.get("due_date"),
                 notes=task.get("description"),
-                priority=task.get("priority", "medium")
+                priority=task.get("priority", "medium")  # In previous models it was string
             )
             integrated_tasks.append(task_res)
+            
+            # Save task to local database
+            add_task(
+                content=f"{task['title']} - {task.get('description', '')}".strip(),
+                priority=task.get("priority", 0),
+                category=task.get("category"),
+                due_date=task.get("due_date")
+            )
+            
+        for idea in data.get("ideas", []):
+            # Save idea to local database
+            add_idea(
+                content=idea["content"],
+                category=idea.get("category")
+            )
+            print(f"💡 [SQLITE] Zapisano pomysł: {idea['content']}")
             
         # Append integration statuses to response for frontend tracking
         result["integrations"] = {
             "calendar_events": integrated_events,
-            "tasks": integrated_tasks
+            "tasks": integrated_tasks,
+            "saved_to_db": True
         }
 
         return result

@@ -6,3 +6,4 @@ requests>=2.31.0
 python-dotenv>=1.0.1
 google-genai>=0.1.1
 openai>=1.12.0
+peewee>=3.16.0

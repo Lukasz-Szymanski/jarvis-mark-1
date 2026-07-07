@@ -30,13 +30,25 @@ class TaskItem(BaseModel):
         default=None, 
         description="Due date in YYYY-MM-DD format if specified or implied. Otherwise null."
     )
-    priority: str = Field(
-        default="medium", 
-        description="Task priority: 'high', 'medium', or 'low'."
+    priority: int = Field(
+        default=0, 
+        description="Task priority: 1 for High (urgent), 0 for Normal."
+    )
+    category: Optional[str] = Field(
+        default=None,
+        description="Category/Tag for the task (e.g. '#praca', '#dom'). Starts with #. Null if no category fits."
     )
     description: Optional[str] = Field(
         default=None, 
         description="Any extra details, context, or notes related to the task in Polish."
+    )
+
+class IdeaItem(BaseModel):
+    """Represents a loose idea or thought, not necessarily tied to a specific date."""
+    content: str = Field(description="The core idea or thought in Polish.")
+    category: Optional[str] = Field(
+        default=None,
+        description="Category/Tag for the idea (e.g. '#biznes', '#app'). Starts with #. Null if no category fits."
     )
 
 
@@ -61,11 +73,12 @@ class EventItem(BaseModel):
 
 
 class ProcessedResult(BaseModel):
-    """Final output containing parsed tasks and events, plus a friendly summary."""
+    """Final output containing parsed tasks, events, and ideas, plus a friendly summary."""
     tasks: List[TaskItem] = Field(default_factory=list, description="List of parsed tasks.")
     events: List[EventItem] = Field(default_factory=list, description="List of parsed calendar events.")
+    ideas: List[IdeaItem] = Field(default_factory=list, description="List of parsed ideas/thoughts.")
     summary: str = Field(
-        description="A friendly, professional summary in Polish describing the schedule, tasks, and recommendations."
+        description="A friendly, professional summary in Polish describing the schedule, tasks, ideas and recommendations."
     )
 
 
@@ -226,9 +239,10 @@ class JarvisAgent:
             f"Aktualny czas systemu: {current_time}.\n"
             "Interpret relative dates/times (like 'tomorrow', 'next Monday', 'in 2 hours') relative to this system time.\n"
             "Ensure that:\n"
-            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority ('high', 'medium', 'low'), and description.\n"
+            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority (1 for high, 0 for normal), category (e.g. '#dom'), and description.\n"
             "2. Events have a title, start_time (YYYY-MM-DD HH:MM), optional end_time, location, and description.\n"
-            "3. Provide a friendly and concise Polish summary describing the schedule and tasks you've generated."
+            "3. Ideas (pomysły) are loose thoughts not meant to be actionable tasks right now. They have content and an optional category (e.g. '#biznes').\n"
+            "4. Provide a friendly and concise Polish summary describing the schedule, tasks, and ideas you've generated."
         )
         
         logger.info(f"Sending request to OpenAI Executor using model '{model_to_use}'...")
@@ -256,9 +270,10 @@ class JarvisAgent:
             f"Aktualny czas systemu: {current_time}.\n"
             "Interpret relative dates/times (like 'tomorrow', 'next Monday', 'in 2 hours') relative to this system time.\n"
             "Ensure that:\n"
-            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority ('high', 'medium', 'low'), and description.\n"
+            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority (1 for high, 0 for normal), category (e.g. '#dom'), and description.\n"
             "2. Events have a title, start_time (YYYY-MM-DD HH:MM), optional end_time, location, and description.\n"
-            "3. Provide a friendly and concise Polish summary describing the schedule and tasks you've generated."
+            "3. Ideas (pomysły) are loose thoughts not meant to be actionable tasks right now. They have content and an optional category (e.g. '#biznes').\n"
+            "4. Provide a friendly and concise Polish summary describing the schedule, tasks, and ideas you've generated."
         )
         
         logger.info(f"Sending request to Gemini Executor using model '{model_to_use}'...")
@@ -285,9 +300,10 @@ class JarvisAgent:
             f"Aktualny czas systemu: {current_time}.\n"
             "Interpret relative dates/times (like 'tomorrow', 'next Monday', 'in 2 hours') relative to this system time.\n"
             "Ensure that:\n"
-            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority ('high', 'medium', 'low'), and description.\n"
+            "1. Tasks have a title, optional due_date (YYYY-MM-DD), priority (1 for high, 0 for normal), category (e.g. '#dom'), and description.\n"
             "2. Events have a title, start_time (YYYY-MM-DD HH:MM), optional end_time, location, and description.\n"
-            "3. Provide a friendly and concise Polish summary describing the schedule and tasks you've generated.\n"
+            "3. Ideas (pomysły) are loose thoughts not meant to be actionable tasks right now. They have content and an optional category (e.g. '#biznes').\n"
+            "4. Provide a friendly and concise Polish summary describing the schedule, tasks, and ideas you've generated.\n"
             "Your response must be valid JSON conforming to this JSON schema:\n"
             f"{schema_json}\n"
             "Do not include any other text or markdown code fences, just the JSON string."
