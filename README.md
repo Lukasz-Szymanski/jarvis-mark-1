@@ -53,8 +53,9 @@ Protects API limits and optimizes expenses using a two-stage evaluation pipeline
 ### 2. Time Anchoring (System Time Awareness)
 Before each LLM call, the current system time is injected into the System Prompt/Instruction in the format `Aktualny czas systemu: YYYY-MM-DD HH:MM`. This allows the AI models to interpret relative date and time specifications such as *"tomorrow"*, *"next Monday"*, or *"in 2 hours"* relative to the host system clock.
 
-### 3. Automated Mock Integrations
-Once the agent finishes structuring the data, the FastAPI backend automatically invokes mock integrations:
+### 3. Automated Mock Integrations & Local Memory
+Once the agent finishes structuring the data, the FastAPI backend automatically:
+*   **Saves to SQLite DB:** Stores tasks, extracted ideas, and their metadata (priority, category) into a persistent local `jarvis_memory.db` file (logic migrated from legacy Focus_Bot).
 *   **Google Calendar** (`GoogleCalendarMock.create_event()`) - prints a beautifully formatted event box directly in the server console.
 *   **Google Tasks** (`GoogleTasksMock.create_task()`) - prints a formatted task details box in the server console.
 
@@ -199,7 +200,7 @@ If you encounter issues during setup or runtime, check these common scenarios:
 
 Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
 *   [ ] **OAuth2 Integration:** Transition from mock structures to official Google Calendar and Google Tasks OAuth2 authorization flow.
-*   [ ] **Persistent Database:** Integrate SQLite/PostgreSQL to persist tasks and user parameters beyond server restarts.
+*   [x] **Persistent Database:** Integrate SQLite/PostgreSQL to persist tasks and user parameters beyond server restarts (Completed).
 *   [ ] **Voice Input Interface:** Add audio transcription (Speech-to-Text) using Whisper API directly inside the Streamlit frontend.
 *   [ ] **Multi-user Support:** Allow multiple users to log in independently with their own calendar keys.
 
@@ -223,5 +224,15 @@ Today, we built, launched, and successfully validated the first working version 
 *   **Model Configuration Optimization:** Swapped default Gemini models to `gemini-3.1-flash-lite` (cheap Gatekeeper) and `gemini-3.5-flash` (premium Executor) to bypass temporary server overloads (503) and free-tier quota limits (429) on other models.
 *   **Antigravity CLI Integration (`AI_PROVIDER=antigravity`):** Implemented support for the CLI-based provider 'antigravity' using subprocess execution of the `agy` command with JSON schema instructions and output cleaning. This completely bypasses the external API keys, rate limits, and 503 overloads by utilizing the local authorized session of `antigravity-cli`.
 *   **E2E Validation:** Successfully verified the test query pipeline. The Gatekeeper correctly classified the prompt as complex (`is_complex: True`), routed to `gemini-3.5-flash`, parsed dates relative to system time, and executed the 4 mock Google Tasks integration requests.
+
+</details>
+
+<details>
+<summary><b>📅 July 07, 2026 — Database & Legacy Focus_Bot Migration</b></summary>
+
+*   **Database Integration:** Migrated the SQLite and Peewee ORM logic from the legacy `Focus_Bot` project. J.A.R.V.I.S. now features persistent memory (`jarvis_memory.db`).
+*   **AI Agent Upgrade:** Updated Pydantic schemas in `agent.py` to extract `IdeaItem` (loose thoughts not tied to dates), categories (`#tags`), and boolean urgency/priorities.
+*   **Roadmap Progress:** Checked off "Persistent Database" from the Future Roadmap.
+*   **Legacy Cleanup:** Completely removed the obsolete `Focus_Bot` repository.
 
 </details>
