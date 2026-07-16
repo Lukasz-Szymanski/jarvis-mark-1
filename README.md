@@ -199,7 +199,7 @@ If you encounter issues during setup or runtime, check these common scenarios:
 ## 🚀 Future Roadmap
 
 Planned updates for future iterations of **J.A.R.V.I.S. Mark I**:
-*   [ ] **OAuth2 Integration:** Transition from mock structures to official Google Calendar and Google Tasks OAuth2 authorization flow.
+*   [x] **OAuth2 Integration:** Transition from mock structures to official Google Calendar and Google Tasks OAuth2 authorization flow. (Completed)
 *   [x] **Persistent Database:** Integrate SQLite/PostgreSQL to persist tasks and user parameters beyond server restarts (Completed).
 *   [ ] **Voice Input Interface:** Add audio transcription (Speech-to-Text) using Whisper API directly inside the Streamlit frontend.
 *   [ ] **Multi-user Support:** Allow multiple users to log in independently with their own calendar keys.

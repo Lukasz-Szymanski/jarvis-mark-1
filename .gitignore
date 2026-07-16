@@ -17,3 +17,7 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Google Auth
+credentials.json
+token.json

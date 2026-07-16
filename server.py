@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from agent import JarvisAgent
-from integrations import GoogleCalendarMock, GoogleTasksMock
+from integrations import GoogleCalendar, GoogleTasks
 from database import init_db, add_task, add_idea
 
 # Initialize local database
@@ -107,13 +107,13 @@ def process_command(payload: ProcessRequest):
         data = result["data"]
         
         # Trigger integrations automatically
-        print("🔌 Triggering Mock Integrations for identified entities...")
+        print("🔌 Triggering API Integrations for identified entities...")
         
         integrated_events = []
         integrated_tasks = []
         
         for event in data.get("events", []):
-            event_res = GoogleCalendarMock.create_event(
+            event_res = GoogleCalendar.create_event(
                 title=event["title"],
                 start_time=event["start_time"],
                 end_time=event.get("end_time"),
@@ -123,7 +123,7 @@ def process_command(payload: ProcessRequest):
             integrated_events.append(event_res)
             
         for task in data.get("tasks", []):
-            task_res = GoogleTasksMock.create_task(
+            task_res = GoogleTasks.create_task(
                 title=task["title"],
                 due=task.get("due_date"),
                 notes=task.get("description"),
