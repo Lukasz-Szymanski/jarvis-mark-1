@@ -245,6 +245,7 @@ Today, we built, launched, and successfully validated the first working version 
 *   **Security:** Added explicit rules to `.gitignore` to prevent leaking `credentials.json` and `token.json` into the public repository.
 *   **Frontend Refactoring (`app.py`):** Removed the hardcoded test phrase placeholder to provide a cleaner UI.
 *   **Bugfix (Priority Parsing):** Fixed a bug where the Streamlit UI crashed (`AttributeError: 'int' object has no attribute 'lower'`) because it expected a string priority from the legacy mock era, whereas the new agent database uses integers (`1` or `0`).
+*   **Bugfix (Google Calendar 400 Bad Request):** Implemented strict date parsing and normalization using `datetime.fromisoformat` in `integrations.py` to prevent Google API from rejecting natural language dates (e.g. "20 lipca 2026") or improperly formatted ISO strings for multi-day events.
 *   **Git Workflow:** Established a global skill `git_sensei` for intelligent, AI-powered commit messages and pushed changes to `origin/master`.
 
 </details>

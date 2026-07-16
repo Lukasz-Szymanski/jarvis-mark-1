@@ -55,25 +55,60 @@ class GoogleCalendar:
             creds = get_google_credentials()
             service = build('calendar', 'v3', credentials=creds)
 
-            # Jeśli end_time nie jest podany, zakładamy +1 godzinę
+            # Formatowanie i weryfikacja dat
+            try:
+                # Zignoruj normalizację jeśli to tylko data (całodniowe)
+                if len(start_time) > 10:
+                    start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
+                    start_time = start_dt.isoformat()
+            except ValueError:
+                pass
+            
+            # Sprawdź czy to wydarzenie całodniowe (tylko data YYYY-MM-DD bez godziny)
+            is_all_day = len(start_time) <= 10 and 'T' not in start_time
+
+            # Jeśli end_time nie jest podany
             if not end_time:
                 try:
                     start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
-                    end_time = (start_dt + timedelta(hours=1)).isoformat()
+                    # Dodaj 1 godzinę tylko jeśli to nie jest samo YYYY-MM-DD
+                    if len(start_time) > 10:
+                        end_time = (start_dt + timedelta(hours=1)).isoformat()
+                    else:
+                        end_time = start_time
                 except ValueError:
                     end_time = start_time
+            else:
+                try:
+                    if len(end_time) > 10:
+                        end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+                        end_time = end_dt.isoformat()
+                except ValueError:
+                    pass
 
             event = {
-                'summary': title,
-                'start': {
+                'summary': title
+            }
+            
+            if is_all_day:
+                # Dla wydarzeń całodniowych Google wymaga klucza 'date', a nie 'dateTime'
+                # Format to samo YYYY-MM-DD
+                event['start'] = {'date': start_time[:10]}
+                
+                # Upewnijmy się że end_time też ma tylko 10 znaków
+                end_date_str = end_time[:10] if end_time else start_time[:10]
+                
+                # Google wymaga żeby data końcowa była +1 dzień, ale API przyjmuje też równe daty
+                event['end'] = {'date': end_date_str}
+            else:
+                event['start'] = {
                     'dateTime': start_time,
                     'timeZone': 'Europe/Warsaw',
-                },
-                'end': {
+                }
+                event['end'] = {
                     'dateTime': end_time,
                     'timeZone': 'Europe/Warsaw',
-                },
-            }
+                }
             
             if location:
                 event['location'] = location

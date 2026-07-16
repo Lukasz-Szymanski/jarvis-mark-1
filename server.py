@@ -107,6 +107,7 @@ def process_command(payload: ProcessRequest):
         data = result["data"]
         
         # Trigger integrations automatically
+        print(f"Otrzymane dane od agenta: {data}")
         print("🔌 Triggering API Integrations for identified entities...")
         
         integrated_events = []
