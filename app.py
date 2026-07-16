@@ -210,33 +210,7 @@ with st.sidebar:
         """
     )
 
-# =====================================================================
-# TEST DATA CONTROLLER
-# =====================================================================
-test_phrase = (
-    "Jutro muszę złożyć wniosek do wydziału oświaty w sprawie mojego awansu zawodowego "
-    "na nauczyciela mianowanego (robię według przepisów z 2018 roku), później muszę "
-    "podejść do szkoły podpisać świadectwo i arkusz. Zrobić pranie firanek i posprzątać mieszkanie."
-)
-
 st.markdown("### 📝 Wprowadź polecenie dla J.A.R.V.I.S.-a")
-
-# Create a container for test data helper
-with st.container():
-    st.markdown(
-        f"""
-        <div class="test-box">
-            <small style="color: #94a3b8; font-weight: 600;">🧪 KLIKNIJ ABY ZAŁADOWAĆ PRZYKŁADOWE DANE TESTOWE:</small><br/>
-            <code style="color: #a5b4fc; font-size: 0.9rem;">"{test_phrase}"</code>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    col_test, _ = st.columns([1, 4])
-    if col_test.button("Załaduj dane testowe"):
-        st.session_state["command_input"] = test_phrase
-        st.rerun()
 
 # Text input for command
 command_input = st.text_area(
@@ -379,13 +353,13 @@ if submit_button:
                         else:
                             for i, task in enumerate(tasks):
                                 # Determine priority badge color
-                                p = task.get("priority", "medium").lower()
-                                if p == "high":
+                                p = task.get("priority", 0)
+                                if p == 1:
                                     p_badge = "background-color: rgba(239,68,68,0.2); color:#f87171; border: 1px solid rgba(239,68,68,0.4);"
-                                elif p == "medium":
-                                    p_badge = "background-color: rgba(234,179,8,0.2); color:#facc15; border: 1px solid rgba(234,179,8,0.4);"
+                                    p_text = "HIGH"
                                 else:
                                     p_badge = "background-color: rgba(59,130,246,0.2); color:#60a5fa; border: 1px solid rgba(59,130,246,0.4);"
+                                    p_text = "NORMAL"
                                     
                                 due_html = f"<span style='color:#94a3b8; font-size: 0.85rem; margin-left: 10px;'>📅 Termin: <b>{task['due_date']}</b></span>" if task.get("due_date") else ""
                                 desc_html = f"<p style='color: #cbd5e1; font-size: 0.9rem; margin-top: 5px;'>{task['description']}</p>" if task.get("description") else ""
@@ -397,7 +371,7 @@ if submit_button:
                                             <div class="card-title" style="color: #818cf8; margin-bottom: 0;">
                                                 ✔️ {task['title']}
                                             </div>
-                                            <span style="font-size:0.7rem; padding: 2px 8px; border-radius: 10px; font-weight:600; text-transform:uppercase; {p_badge}">{p}</span>
+                                            <span style="font-size:0.7rem; padding: 2px 8px; border-radius: 10px; font-weight:600; text-transform:uppercase; {p_badge}">{p_text}</span>
                                         </div>
                                         <div style="margin-top: 5px;">
                                             {due_html}

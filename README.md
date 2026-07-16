@@ -236,3 +236,15 @@ Today, we built, launched, and successfully validated the first working version 
 *   **Legacy Cleanup:** Completely removed the obsolete `Focus_Bot` repository.
 
 </details>
+
+<details>
+<summary><b>📅 July 16, 2026 — OAuth2 Google API Integration & Frontend Polish</b></summary>
+
+*   **OAuth2 Integration:** Replaced `GoogleCalendarMock` and `GoogleTasksMock` with actual Google API integrations (`google-api-python-client`, `google-auth-oauthlib`). J.A.R.V.I.S. now creates real events and tasks in Google Workspace.
+*   **Authentication Flow:** Implemented the `InstalledAppFlow` to fetch and store `token.json` locally using `credentials.json` (Desktop App type).
+*   **Security:** Added explicit rules to `.gitignore` to prevent leaking `credentials.json` and `token.json` into the public repository.
+*   **Frontend Refactoring (`app.py`):** Removed the hardcoded test phrase placeholder to provide a cleaner UI.
+*   **Bugfix (Priority Parsing):** Fixed a bug where the Streamlit UI crashed (`AttributeError: 'int' object has no attribute 'lower'`) because it expected a string priority from the legacy mock era, whereas the new agent database uses integers (`1` or `0`).
+*   **Git Workflow:** Established a global skill `git_sensei` for intelligent, AI-powered commit messages and pushed changes to `origin/master`.
+
+</details>

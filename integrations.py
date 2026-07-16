@@ -109,7 +109,7 @@ class GoogleTasks:
         title: str,
         due: Optional[str] = None,
         notes: Optional[str] = None,
-        priority: str = "medium"
+        priority: int = 0
     ) -> dict:
         try:
             creds = get_google_credentials()
@@ -127,7 +127,7 @@ class GoogleTasks:
                 task_body['notes'] = notes
 
             # Tasks API nie wspiera natywnego priorytetu, oznaczmy go wizualnie
-            if priority and priority.lower() == "high":
+            if priority == 1:
                 task_body['title'] = f"❗ {title}"
 
             logger.info(f"Wysyłam zapytanie do Google Tasks: {title}")

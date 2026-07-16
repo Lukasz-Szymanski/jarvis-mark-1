@@ -127,7 +127,7 @@ def process_command(payload: ProcessRequest):
                 title=task["title"],
                 due=task.get("due_date"),
                 notes=task.get("description"),
-                priority=task.get("priority", "medium")  # In previous models it was string
+                priority=task.get("priority", 0)
             )
             integrated_tasks.append(task_res)
             

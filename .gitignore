@@ -21,3 +21,8 @@ Thumbs.db
 # Google Auth
 credentials.json
 token.json
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
